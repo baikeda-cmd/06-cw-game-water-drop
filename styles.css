@@ -1,0 +1,275 @@
+/* Charity: water Brand Colors & Fonts
+
+Primary Colors:
+- Yellow:     #FFC907
+- Blue:       #2E9DF7
+
+Secondary Colors:
+- Light Blue: #8BD1CB
+- Green:      #4FCB53
+- Orange:     #FF902A
+- Red:        #F5402C
+- Dark Green: #159A48
+- Pink:       #F16061
+
+Fonts:
+- Proxima Nova
+- Avenir
+
+*/
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-black: #111111;
+    --color-yellow: #ffc907;
+    --color-pale-yellow: #fff5c2;
+    --color-white: #ffffff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--color-black);
+    background-image: radial-gradient(
+        ellipse at center,
+        transparent 0 22px,
+        rgba(46, 157, 247, 0.16) 23px 24px,
+        transparent 25px 42px,
+        rgba(46, 157, 247, 0.09) 43px 44px,
+        transparent 45px
+    );
+    background-size: 180px 140px;
+    font-family: Arial, sans-serif;
+}
+
+.game-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.score-panel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;  /* Space between score and button */
+    align-items: center;
+    gap: 12px;
+    width: 800px;
+    padding: 10px;
+    background-color: var(--color-black);
+    color: var(--color-white);
+    border: 2px solid var(--color-yellow);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.timer {
+    flex: 0 1 auto;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#game-container {
+    width: 800px;
+    height: 600px;
+    background-color: var(--color-pale-yellow);
+    border: 2px solid var(--color-yellow);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+    cursor: none;
+}
+
+#bucket {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    pointer-events: none;
+    transform: translateX(-50%);
+    user-select: none;
+}
+
+
+#start-btn {
+    padding: 8px 16px;
+    background-color: #198754;
+    color: var(--color-white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#reset-btn {
+    padding: 8px 16px;
+    background-color: var(--color-yellow);
+    color: var(--color-black);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#reset-btn:hover {
+    background-color: #e6b400;
+}
+
+#start-btn:hover {
+    background-color: #157347;
+}
+
+#start-btn.is-stop {
+    background-color: #dc3545;
+}
+
+#start-btn.is-stop:hover {
+    background-color: #bb2d3b;
+}
+
+.score {
+    flex: 0 1 auto;  /* Don't grow, can shrink, auto basis */
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.water-drop {
+    position: absolute;
+    width: 60px;  /* increased from 40px */
+    height: 60px; /* increased from 40px */
+    background-color: #0099ff;
+    border-radius: 50%;
+    animation: dropFall linear forwards;
+    transform-origin: center;
+    cursor: pointer;
+    padding: 15px;  /* Add padding for larger click area */
+    margin: -15px;  /* Offset padding to maintain visual size */
+    transition: transform 0.1s ease;  /* Smooth hover effect */
+}
+
+.water-drop:hover {
+    transform: scale(1.1);  /* Slight grow effect on hover */
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -16px;
+    width: 9px;
+    height: 14px;
+    pointer-events: none;
+    z-index: 2;
+    animation: confetti-fall 1.6s ease-in forwards;
+}
+
+.bad-drop {
+    background-color: #8b4513;
+}
+
+.game-title {
+    color: var(--color-yellow);
+    font-family: "Trebuchet MS", "Arial Rounded MT Bold", sans-serif;
+    font-size: 44px;
+    line-height: 1.1;
+    max-width: 100%;
+    margin-top: 0;
+    margin-bottom: 5px;  /* reduced from 20px */
+    text-align: center;
+}
+
+.game-tagline {
+    color: var(--color-white);
+    font-size: 18px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+@keyframes dropFall {
+    from {
+        transform: translateY(-20px);
+    }
+    to {
+        transform: translateY(600px);
+    }
+}
+
+@keyframes confetti-fall {
+    from {
+        transform: translateY(-16px) rotate(0deg);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(620px) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 850px) {
+    .game-wrapper, .score-panel, #game-container {
+        width: 95vw;
+    }
+    
+    #game-container {
+        height: 70vh;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        align-items: flex-start;
+        padding: 20px 0;
+    }
+
+    .game-wrapper {
+        gap: 14px;
+    }
+
+    .game-title {
+        font-size: 34px;
+    }
+
+    .game-tagline {
+        font-size: 16px;
+        margin-bottom: 0;
+        padding: 0 12px;
+    }
+
+    .score-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .score,
+    .timer {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    #start-btn,
+    #reset-btn {
+        min-height: 44px;
+        padding: 8px;
+        font-size: 15px;
+    }
+
+    #game-container {
+        height: min(70vh, 520px);
+    }
+
+    #bucket {
+        width: 112px;
+        height: 112px;
+    }
+}
