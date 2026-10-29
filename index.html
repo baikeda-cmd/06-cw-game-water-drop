@@ -4,23 +4,201 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Water Drop Game</title>
+    <meta name="description" content="Fast-paced water drop catching game featuring Easy, Normal, and Hard difficulty modes with exponential droplet fall speed acceleration.">
+    <meta property="og:title" content="Water Drop Game">
+    <meta property="og:description" content="Fast-paced water drop catching game featuring Easy, Normal, and Hard difficulty modes with exponential droplet fall speed acceleration.">
+    <link rel="preconnect" href="https://fonts.cdnfonts.com">
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/proxima-nova">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="game-wrapper">
-        <h1 class="game-title">Water Drop</h1>
-        <p class="game-tagline">Catch the good drops, avoid the bad ones!</p>
-        <div class="score-panel">
-            <div class="score">Score: <span id="score">0</span></div>
-            <div class="timer">Time: <span id="time">0</span>s</div>
-            <button id="start-btn">Start Game</button>
-            <button id="reset-btn" hidden>Reset Game</button>
-        </div>
+    <main class="game-wrapper">
+        <header class="game-header">
+            <div class="logo-wrap">
+                <img src="img/cw_logo-horizontal.png" alt="charity: water" class="cw-logo" onerror="this.style.display='none'">
+            </div>
+            <h1 class="game-title">Water Drop</h1>
+            <p class="game-tagline">Catch clean water, dodge dirty drops, and survive exponential droplet fall speeds!</p>
+        </header>
+
+        <!-- Difficulty Mode Selector -->
+        <section class="difficulty-panel" aria-label="Game Difficulty Selection">
+            <div class="difficulty-header">
+                <span class="diff-title">Difficulty Mode</span>
+                <span class="diff-curve-badge" title="Fall speed accelerates exponentially over time">
+                    <span class="badge-icon">⚡</span> Exponential Fall Acceleration
+                </span>
+            </div>
+            <div class="difficulty-buttons" role="radiogroup" aria-label="Difficulty Mode">
+                <button type="button" class="diff-btn" data-mode="easy" id="diff-easy" role="radio" aria-checked="false">
+                    <div class="diff-btn-head">
+                        <span class="diff-dot easy-dot"></span>
+                        <span class="diff-name">Easy</span>
+                    </div>
+                    <span class="diff-rate-tag">Base 4.6s &bull; +25% / 10s</span>
+                </button>
+                <button type="button" class="diff-btn active" data-mode="normal" id="diff-normal" role="radio" aria-checked="true">
+                    <div class="diff-btn-head">
+                        <span class="diff-dot normal-dot"></span>
+                        <span class="diff-name">Normal</span>
+                    </div>
+                    <span class="diff-rate-tag">Base 3.2s &bull; +46% / 10s</span>
+                </button>
+                <button type="button" class="diff-btn" data-mode="hard" id="diff-hard" role="radio" aria-checked="false">
+                    <div class="diff-btn-head">
+                        <span class="diff-dot hard-dot"></span>
+                        <span class="diff-name">Hard</span>
+                    </div>
+                    <span class="diff-rate-tag">Base 2.1s &bull; +78% / 10s</span>
+                </button>
+            </div>
+            <div class="difficulty-info" id="difficulty-desc">
+                <strong>Normal Mode:</strong> Balanced drops with moderate exponential acceleration. Drops fall noticeably faster each second!
+            </div>
+        </section>
+
+        <!-- Score & Status Panel -->
+        <section class="score-panel" aria-label="Game Stats and Controls">
+            <div class="stat-box">
+                <span class="stat-label">Score</span>
+                <span class="stat-val" id="score">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Time</span>
+                <span class="stat-val"><span id="time">0</span>s</span>
+            </div>
+            <div class="stat-box stat-speed" title="Exponential fall speed multiplier">
+                <span class="stat-label">Fall Speed</span>
+                <div class="stat-speed-val-wrap">
+                    <span class="stat-val speed-val" id="speed-multiplier">1.00x</span>
+                    <span class="speed-formula-tag">e<sup>kt</sup></span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">Best (<span id="high-score-mode">Normal</span>)</span>
+                <span class="stat-val high-score-val" id="high-score">0</span>
+            </div>
+            <div class="panel-controls">
+                <button type="button" id="sound-btn" class="icon-btn" title="Toggle Sound" aria-label="Toggle Sound">🔊</button>
+                <button type="button" id="start-btn">Start Game</button>
+                <button type="button" id="reset-btn" hidden>Reset</button>
+            </div>
+        </section>
         
-        <div id="game-container">
-            <img id="bucket" src="img/water-can.png" alt="" draggable="false">
+        <!-- Game Playfield -->
+        <div id="game-container" tabindex="0" role="region" aria-label="Water Drop Play Area">
+            <div id="visual-effects-layer"></div>
+
+            <!-- Milestone Notification Banner (Every 10 Points) -->
+            <div id="milestone-banner" class="milestone-banner hidden" role="status" aria-live="polite">
+                <div class="milestone-badge-icon" id="milestone-icon">💧</div>
+                <div class="milestone-text-block">
+                    <div class="milestone-kicker" id="milestone-kicker">MILESTONE REACHED</div>
+                    <div class="milestone-headline" id="milestone-title">10 Drops Collected!</div>
+                    <div class="milestone-subtext" id="milestone-desc">A single ripple can become a wave. Great start!</div>
+                </div>
+                <div class="milestone-score-tag" id="milestone-tag">+10 pts</div>
+            </div>
+
+            <img id="bucket" src="img/water-can.png" alt="Water Can" draggable="false">
+
+            <!-- Game Over / End Screen Overlay -->
+            <div id="game-overlay" class="game-overlay hidden" aria-modal="true" role="dialog">
+                <div class="overlay-modal">
+                    <div class="overlay-badge" id="overlay-badge">Run Complete!</div>
+                    <h2 id="overlay-title">Great Effort!</h2>
+                    <p id="overlay-message">Every drop counts for clean water around the world.</p>
+                    
+                    <div class="overlay-stats-grid">
+                        <div class="overlay-stat-item">
+                            <span class="overlay-stat-lbl">Difficulty</span>
+                            <span class="overlay-stat-num" id="overlay-mode">Normal</span>
+                        </div>
+                        <div class="overlay-stat-item">
+                            <span class="overlay-stat-lbl">Final Score</span>
+                            <span class="overlay-stat-num highlight" id="overlay-score">0</span>
+                        </div>
+                        <div class="overlay-stat-item">
+                            <span class="overlay-stat-lbl">Time Survived</span>
+                            <span class="overlay-stat-num" id="overlay-time">0s</span>
+                        </div>
+                        <div class="overlay-stat-item">
+                            <span class="overlay-stat-lbl">Peak Fall Speed</span>
+                            <span class="overlay-stat-num" id="overlay-speed">1.00x</span>
+                        </div>
+                    </div>
+
+                    <div id="overlay-record-tag" class="overlay-record-tag hidden">🏆 New High Score!</div>
+
+                    <div class="overlay-actions">
+                        <button type="button" id="overlay-play-btn" class="action-btn primary-btn">Play Again</button>
+                        <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer" class="action-btn donate-link-btn">💛 Donate Water</a>
+                        <button type="button" id="overlay-close-btn" class="action-btn secondary-btn">View Board</button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- charity: water Impact & Donation Section -->
+        <section class="cw-impact-section" aria-label="About charity: water and Donation">
+            <div class="cw-impact-card">
+                <div class="cw-impact-header">
+                    <img src="img/cw_logo.png" alt="charity: water logo" class="cw-card-logo" onerror="this.style.display='none'">
+                    <div class="cw-impact-titles">
+                        <span class="cw-pretitle">100% Model &bull; Clean Water for Everyone</span>
+                        <h2 class="cw-heading">Clean Water Changes Everything</h2>
+                    </div>
+                </div>
+                <p class="cw-description">
+                    703 million people live without access to clean water. charity: water is on a mission to change that. 
+                    <strong>100% of every public donation</strong> directly funds sustainable clean water projects for communities worldwide.
+                </p>
+                <div class="cw-action-links">
+                    <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer" class="cw-btn cw-btn-donate">
+                        <span class="btn-icon">💛</span> Donate to charity: water
+                    </a>
+                    <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer" class="cw-btn cw-btn-primary">
+                        Visit charitywater.org <span class="external-arrow">&nearr;</span>
+                    </a>
+                    <a href="https://www.charitywater.org/the-spring" target="_blank" rel="noopener noreferrer" class="cw-btn cw-btn-secondary">
+                        Join The Spring <span class="external-arrow">&nearr;</span>
+                    </a>
+                    <a href="https://www.charitywater.org/why-water" target="_blank" rel="noopener noreferrer" class="cw-btn cw-btn-secondary">
+                        Why Clean Water? <span class="external-arrow">&nearr;</span>
+                    </a>
+                </div>
+                <div class="cw-proof-bar">
+                    <div class="cw-proof-item">
+                        <span class="proof-number">100%</span>
+                        <span class="proof-label">Direct to Field</span>
+                    </div>
+                    <div class="cw-proof-divider"></div>
+                    <div class="cw-proof-item">
+                        <span class="proof-number">17M+</span>
+                        <span class="proof-label">People Served</span>
+                    </div>
+                    <div class="cw-proof-divider"></div>
+                    <div class="cw-proof-item">
+                        <span class="proof-number">150K+</span>
+                        <span class="proof-label">Water Projects</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="game-footer">
+            <p class="controls-hint">
+                <span class="keyboard-icon">⌨</span> Move bucket with <strong>Mouse</strong>, <strong>Touch</strong>, or <strong>Arrow Keys / A &amp; D</strong>. Click drops directly to catch! Keys <strong>1, 2, 3</strong> switch difficulty.
+            </p>
+            <div class="footer-links-row">
+                <span>Learn more at <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer" class="footer-link">charitywater.org</a></span>
+                <span class="footer-dot">&bull;</span>
+                <span>Give clean water at <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer" class="footer-link highlight">charitywater.org/donate</a></span>
+                <span class="footer-dot">&bull;</span>
+                <span>Private donors fund 100% of overhead</span>
+            </div>
+        </footer>
+    </main>
     
     <script src="script.js"></script>
 </body>
